@@ -2,20 +2,19 @@ package org.example.model;
 
 import java.time.LocalDate;
 
-public abstract class Konzerv {
+public abstract class Konzerv implements Comparable<Konzerv>{
     public static final int MAX_QUANTITY=1000;
 
-    private static int nextid=1;
     private final int id;
-    private final String nev;
+    private final String name;
     private final LocalDate createdAt;
     private final int nettoGramm;
     private int stock;
-    private LocalDate lejaratiDatum;
+    private LocalDate expiryDate;
 
 
-    protected Konzerv(String nev, int nettoGramm, int stock, LocalDate createdAt, LocalDate lejaratiDatum){
-        if (nev == null || nev.trim().isEmpty()) {
+    protected Konzerv(String name, int id, int nettoGramm, int stock, LocalDate createdAt, LocalDate expiryDate){
+        if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("A konzerv neve nem lehet üres!");
         }
         if (nettoGramm <= 0) {
@@ -27,12 +26,12 @@ public abstract class Konzerv {
         if (createdAt == null || createdAt.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("A gyártási dátum nem lehet érvénytelen vagy jövőbeli!");
         }
-        this.nev=nev;
-        this.id=nextid++;
+        this.name= name;
+        this.id=id;
         this.nettoGramm=nettoGramm;
         this.stock=stock;
         this.createdAt = createdAt;
-        this.lejaratiDatum = lejaratiDatum;
+        this.expiryDate = expiryDate;
     }
 
     public final int getId() {
@@ -43,8 +42,8 @@ public abstract class Konzerv {
         return nettoGramm;
     }
 
-    public final String getNev() {
-        return nev;
+    public final String getName() {
+        return name;
     }
 
     public int getStock() {
@@ -55,8 +54,16 @@ public abstract class Konzerv {
         return createdAt;
     }
 
-    public LocalDate getLejaratiDatum() {
-        return lejaratiDatum;
+    public LocalDate getExpiryDate() {
+        return expiryDate;
+    }
+
+    public boolean isExpired() {
+        return LocalDate.now().isAfter(expiryDate);
+    }
+
+    public boolean isExpired(LocalDate currentDate) {
+        return currentDate.isAfter(expiryDate);
     }
 
 
@@ -90,13 +97,17 @@ public abstract class Konzerv {
 
     protected void printBaseInfo() {
         System.out.println("ID: " + id);
-        System.out.println("Name: " + nev);
+        System.out.println("Name: " + name);
         System.out.println("Netto weight: " + nettoGramm);
         System.out.println("Stock: " + stock);
         System.out.println("Created at: " + createdAt);
-        System.out.println("Lejárati dátum: "+lejaratiDatum);
+        System.out.println("Lejárati dátum: "+expiryDate);
     }
 
+    @Override
+    public int compareTo(Konzerv other) {
+        return this.expiryDate.compareTo(other.expiryDate);
+    }
 
 
 }
