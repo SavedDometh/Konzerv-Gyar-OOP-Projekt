@@ -5,19 +5,26 @@ import java.time.LocalDate;
 public class ZoldsegKonzerv extends Konzerv{
     private String vegetableType;
     private boolean bio;
-    private int storageTemperature;
 
-    public ZoldsegKonzerv(String nev, int id, int nettoGramm, String vegetableType, int stock, LocalDate createdAt, boolean bio){
-        super(nev, id, nettoGramm, stock, createdAt, createdAt.plusYears(3));
-        if (vegetableType == null || nev.trim().isEmpty()) {
+    public ZoldsegKonzerv(int id, KonzervTipus tipus, int nettoGramm, String vegetableType, LocalDate createdAt, boolean bio){
+        super(id, tipus, nettoGramm, createdAt, createdAt != null ? createdAt.plusYears(3) : null);
+        if (vegetableType == null || vegetableType.trim().isEmpty()) {
             throw new IllegalArgumentException("A zöldség típusa nem lehet üres!");
         }
         this.vegetableType = vegetableType;
         this.bio=bio;
-        this.storageTemperature =18;
     }
 
-    public boolean getbio(){
+    public String getVegetableType(){
+        return vegetableType;
+    }
+
+    @Override
+    public int getRecommendedStorageTemp() {
+        return 20;
+    }
+
+    public boolean isBio(){
         return bio;
     }
 
@@ -25,18 +32,9 @@ public class ZoldsegKonzerv extends Konzerv{
         this.bio=bio;
     }
 
-    public int getStorageTemperature(){
-        return storageTemperature;
-    }
-
-    public void setStorageTemperature(int storageTemperature){
-        this.storageTemperature = storageTemperature;
-    }
-
     @Override
-    public void printInfo(){
-        printBaseInfo();
-        System.out.println("Zöldség típusa: " + vegetableType);
-        System.out.println(("Bio zöldségből készült: " + bio));
+    public String toString() {
+        return super.toString() + " | Zöldség típusa: " + this.vegetableType + " | Tárolási hőm.: " + getRecommendedStorageTemp() + "°C";
     }
+
 }

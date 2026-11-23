@@ -1,0 +1,26 @@
+
+    public boolean addStock() {
+        if (this.stock + 1 > MAX_QUANTITY) return false;
+        this.stock++;
+        return true;
+    }
+
+    public boolean addStock(int quantity) {
+        if (quantity <= 0) return false;
+        if (this.stock + quantity > MAX_QUANTITY) return false;
+        this.stock += quantity;
+        return true;
+    }
+
+    public boolean removeStock(int quantity) {
+        if (quantity <= 0) return false;
+        if (quantity > this.stock) return false;
+        this.stock -= quantity;
+        return true;
+    }
+
+    public boolean removeStock() {
+        if (1 > this.stock) return false;
+        this.stock--;
+        return true;
+    }

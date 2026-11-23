@@ -3,36 +3,38 @@ package org.example.model;
 import java.time.LocalDate;
 
 public abstract class Konzerv implements Comparable<Konzerv>{
-    public static final int MAX_QUANTITY=1000;
 
     private final int id;
-    private final String name;
+    private final KonzervTipus tipus;
     private final LocalDate createdAt;
     private final int nettoGramm;
-    private int stock;
     private LocalDate expiryDate;
 
 
-    protected Konzerv(String name, int id, int nettoGramm, int stock, LocalDate createdAt, LocalDate expiryDate){
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("A konzerv neve nem lehet üres!");
+    protected Konzerv(int id, KonzervTipus tipus, int nettoGramm, LocalDate createdAt, LocalDate expiryDate){
+        if (id <= 0) {
+            throw new IllegalArgumentException("Az azonosítónak pozitívnak kell lennie!");
+        }
+        if (tipus == null) {
+            throw new IllegalArgumentException("A konzerv típusa nem lehet null!");
         }
         if (nettoGramm <= 0) {
             throw new IllegalArgumentException("A nettó tömegnek pozitívnak kell lennie!");
         }
-        if (stock < 0) {
-            throw new IllegalArgumentException("Nem lehet negatív db konzerv!");
-        }
         if (createdAt == null || createdAt.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("A gyártási dátum nem lehet érvénytelen vagy jövőbeli!");
         }
-        this.name= name;
+        if (expiryDate == null || expiryDate.isBefore(createdAt)) {
+            throw new IllegalArgumentException("A lejárati dátum nem lehet korábbi a gyártásnál!");
+        }
         this.id=id;
+        this.tipus=tipus;
         this.nettoGramm=nettoGramm;
-        this.stock=stock;
         this.createdAt = createdAt;
         this.expiryDate = expiryDate;
     }
+
+    public abstract int getRecommendedStorageTemp();
 
     public final int getId() {
         return id;
@@ -40,14 +42,6 @@ public abstract class Konzerv implements Comparable<Konzerv>{
 
     public final int getNettoGramm(){
         return nettoGramm;
-    }
-
-    public final String getName() {
-        return name;
-    }
-
-    public int getStock() {
-        return stock;
     }
 
     public LocalDate getCreatedAt(){
@@ -66,48 +60,15 @@ public abstract class Konzerv implements Comparable<Konzerv>{
         return currentDate.isAfter(expiryDate);
     }
 
-
-    public boolean addStock() {
-        if (this.stock + 1 > MAX_QUANTITY) return false;
-        this.stock++;
-        return true;
-    }
-
-    public boolean addStock(int quantity) {
-        if (quantity <= 0) return false;
-        if (this.stock + quantity > MAX_QUANTITY) return false;
-        this.stock += quantity;
-        return true;
-    }
-
-    public boolean removeStock(int quantity) {
-        if (quantity <= 0) return false;
-        if (quantity > this.stock) return false;
-        this.stock -= quantity;
-        return true;
-    }
-
-    public boolean removeStock() {
-        if (1 > this.stock) return false;
-        this.stock--;
-        return true;
-    }
-
-    public abstract void printInfo();
-
-    protected void printBaseInfo() {
-        System.out.println("ID: " + id);
-        System.out.println("Name: " + name);
-        System.out.println("Netto weight: " + nettoGramm);
-        System.out.println("Stock: " + stock);
-        System.out.println("Created at: " + createdAt);
-        System.out.println("Lejárati dátum: "+expiryDate);
-    }
-
     @Override
     public int compareTo(Konzerv other) {
         return this.expiryDate.compareTo(other.expiryDate);
     }
 
+    @Override
+    public String toString() {
+        return String.format("[%d] %s - %dg | Gyártva: %s | Lejár: %s",
+                id, tipus, nettoGramm, createdAt, expiryDate);
+    }
 
 }
