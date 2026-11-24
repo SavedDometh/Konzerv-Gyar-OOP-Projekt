@@ -40,6 +40,8 @@ public abstract class Konzerv implements Comparable<Konzerv>{
         return id;
     }
 
+    public KonzervTipus getTipus(){return tipus;}
+
     public final int getNettoGramm(){
         return nettoGramm;
     }
