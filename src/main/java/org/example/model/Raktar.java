@@ -10,10 +10,6 @@ import java.util.List;
 
 public class Raktar {
 
-    //Még nem ellenőriztem hogy jó-e
-    //Under development cucc
-
-
     private final int maxKapacitas;
     private final List<Konzerv> keszlet;
 
@@ -25,10 +21,8 @@ public class Raktar {
         this.keszlet = new ArrayList<>();
     }
 
-    /**
-     * Új konzerv betárolása a raktárba. Ha a raktár megtelt, saját kivételt dob.
-     */
-    public void bevetelez(Konzerv konzerv) throws RaktarMegteltException {
+
+    public void raktarozas(Konzerv konzerv) throws RaktarMegteltException {
         if (konzerv == null) {
             throw new IllegalArgumentException("Nem lehet null konzervet bevételezni!");
         }
@@ -40,10 +34,7 @@ public class Raktar {
         keszlet.add(konzerv);
     }
 
-    /**
-     * Kiszállít (eltávolít) adott mennyiségű konzervet a megadott típusból.
-     * Mindig a leghamarabb lejáró tételeket adja ki először (FEFO elv).
-     */
+
     public List<Konzerv> kiszallit(KonzervTipus tipus, int darabszam) throws KonzervGyarException {
         if (tipus == null) {
             throw new IllegalArgumentException("A konzerv típusa nem lehet null!");
@@ -60,14 +51,13 @@ public class Raktar {
             );
         }
 
-        // Lejárati dátum szerint sorba rendezzük a megfelelő típusú konzerveket
         List<Konzerv> jeloltek = new ArrayList<>();
         for (Konzerv k : keszlet) {
             if (k.getTipus() == tipus) {
                 jeloltek.add(k);
             }
         }
-        Collections.sort(jeloltek); // Comparable<Konzerv> alapján lejárat szerint növekvő
+        Collections.sort(jeloltek);
 
         List<Konzerv> kiszallitott = new ArrayList<>();
         for (int i = 0; i < darabszam; i++) {
@@ -79,19 +69,12 @@ public class Raktar {
         return kiszallitott;
     }
 
-    /**
-     * Eltávolítja a lejárt szavatosságú konzerveket a raktárból.
-     * @return A selejtezett konzervek darabszáma.
-     */
     public int selejtezLejartakat() {
         int eredetiMeret = keszlet.size();
-        keszlet.removeIf(Konzerv::isExpired);
+        keszlet.removeIf(Konzerv::isExpired); //inkább hagyom a for-ral való megoldást, ha konzerv.isExpired() true: remove konzerv
         return eredetiMeret - keszlet.size();
     }
 
-    /**
-     * Megszámolja, hogy egy adott konzervtípusból hány darab van jelenleg a raktárban.
-     */
     public int getDarabszamTipusSzerint(KonzervTipus tipus) {
         if (tipus == null) {
             return 0;
@@ -105,10 +88,6 @@ public class Raktar {
         return db;
     }
 
-    /**
-     * Meghatározza, melyik konzervtípusból van a legkevesebb készleten.
-     * Ezt használja az AutomatikusHianyAlapuStrategia.
-     */
     public KonzervTipus getLeghianyosabbTipus() {
         KonzervTipus leghianyosabb = KonzervTipus.values()[0];
         int minDarab = getDarabszamTipusSzerint(leghianyosabb);
@@ -123,31 +102,13 @@ public class Raktar {
         return leghianyosabb;
     }
 
-    // --- Rendezett lekérdezések (Comparable és Comparator használata) ---
-
-    /**
-     * Visszaadja a teljes készletet lejárati dátum szerint rendezve (Comparable<Konzerv>).
-     */
     public List<Konzerv> getKeszletLejaratSzerint() {
         List<Konzerv> rendezett = new ArrayList<>(keszlet);
         Collections.sort(rendezett);
         return Collections.unmodifiableList(rendezett);
     }
 
-    /**
-     * Visszaadja a teljes készletet nettó tömeg szerint csökkenő sorrendben (Comparator).
-     */
-    public List<Konzerv> getKeszletTomegSzerint() {
-        List<Konzerv> rendezett = new ArrayList<>(keszlet);
-        rendezett.sort(Comparator.comparingInt(Konzerv::getNettoGramm).reversed());
-        return Collections.unmodifiableList(rendezett);
-    }
-
-    // --- Getterek és állapotlekérdezések (Enkapszuláció) ---
-
-    public List<Konzerv> getKeszlet() {
-        return Collections.unmodifiableList(keszlet);
-    }
+    public List<Konzerv> getKeszlet() {return keszlet;}
 
     public int getMaxKapacitas() {
         return maxKapacitas;
