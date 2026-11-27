@@ -108,7 +108,27 @@ public class GyarManager {
     }
 
 
+    //persistence dolgok
 
+
+    public GyarManager(Raktar raktar, List<Gyartosor> gyartosorok) {
+        this(raktar, gyartosorok, 0);
+    }
+
+    public GyarManager(Raktar raktar, List<Gyartosor> gyartosorok, int elteltCiklusok) {
+        if (raktar == null) {
+            throw new IllegalArgumentException("A raktár nem lehet null!");
+        }
+        if (gyartosorok == null || gyartosorok.isEmpty()) {
+            throw new IllegalArgumentException("Legalább egy gyártósort meg kell adni!");
+        }
+        if (elteltCiklusok < 0) {
+            throw new IllegalArgumentException("Az eltelt ciklusok száma nem lehet negatív!");
+        }
+        this.raktar = raktar;
+        this.gyartosorok = new ArrayList<>(gyartosorok);
+        this.elteltCiklusok = elteltCiklusok;
+    }
 
     public Raktar getRaktar() {
         return raktar;

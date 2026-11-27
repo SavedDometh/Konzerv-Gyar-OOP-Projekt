@@ -21,6 +21,10 @@ public class ManualisGyartasStrategia implements GyartasiStrategia {
         this.celTipus = celTipus;
     }
 
+    public KonzervTipus getCelTipus() {
+        return celTipus;
+    }
+
     @Override
     public KonzervTipus meghatarozKovetkezoGyartas(Raktar raktar) {
         return celTipus;
