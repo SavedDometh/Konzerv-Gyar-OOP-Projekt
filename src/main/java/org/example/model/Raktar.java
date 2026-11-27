@@ -5,7 +5,6 @@ import org.example.exception.RaktarMegteltException;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class Raktar {
