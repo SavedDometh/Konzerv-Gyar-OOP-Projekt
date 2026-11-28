@@ -1,0 +1,226 @@
+@startuml KonzervGyar_ClassDiagram
+set namespaceSeparator none
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam nodesep 25
+skinparam ranksep 35
+skinparam shadowing false
+scale max 3600 width
+
+title Konzervgyár - UML Osztálydiagram
+
+package "org.example" {
+    class Main {
+        + {static} main(args: String[]): void
+    }
+}
+
+package "org.example.ui" {
+    class ConsoleMenu {
+        - {static} MENTESI_FAJL: String
+        - gyarManager: GyarManager
+        - storageService: StorageService
+        - scanner: Scanner
+        + ConsoleMenu(gyarManager: GyarManager, storageService: StorageService)
+        + indit(): void
+        - megjelenitAllapot(): void
+        - termelesLepteteseMenu(): void
+        - egyGyartosorInditasa(): void
+        - gyartosorBeallitasa(): void
+        - kiszallitasMenu(): void
+        - keszletEsSelejtezesMenu(): void
+        - allapotMentese(): void
+        - allapotBetoltese(): void
+    }
+}
+
+package "org.example.service" {
+    class GyarManager {
+        + {static} NAPI_CIKLUSOK: int
+        - raktar: Raktar
+        - gyartosorok: List<Gyartosor>
+        - elteltCiklusok: int
+        + GyarManager(raktarKapacitas: int)
+        + GyarManager(raktar: Raktar, gyartosorok: List<Gyartosor>, elteltCiklusok: int)
+        + leptetTermelest(): List<Konzerv>
+        + leptetTermelest(ciklusokSzama: int): List<Konzerv>
+        + szimulalTeljesNapot(): List<Konzerv>
+        + gyartEgySoron(gyartosorId: int): List<Konzerv>
+        + allitGyartosorStrategiat(gyartosorId: int, ujStrategia: GyartasiStrategia): void
+        + allitGyartosorAllapotot(gyartosorId: int, aktiv: boolean): void
+        + allitGyartosorSebesseget(gyartosorId: int, ujSebesseg: int): void
+        + kiszallitRaktarbol(tipus: KonzervTipus, darabszam: int): List<Konzerv>
+        + selejtezLejartakat(): int
+        - keresGyartosort(id: int): Gyartosor
+    }
+}
+
+package "org.example.model" {
+    enum KonzervTipus {
+        CSEMEGEKUKORICA
+        ZOLDBAB
+        ZOLDBORSO
+        MARHAPORKOLT
+        MAJKREM
+        TONHAL
+        - megnevezes: String
+        - zoldseg: boolean
+        + isZoldseg(): boolean
+        + isHus(): boolean
+    }
+
+    abstract class Konzerv {
+        - id: int
+        - tipus: KonzervTipus
+        - createdAt: LocalDate
+        - nettoGramm: int
+        - expiryDate: LocalDate
+        # Konzerv(id: int, tipus: KonzervTipus, nettoGramm: int, createdAt: LocalDate, expiryDate: LocalDate)
+        + {abstract} getRecommendedStorageTemp(): int
+        + isExpired(): boolean
+        + isExpired(currentDate: LocalDate): boolean
+        + compareTo(other: Konzerv): int
+        + toString(): String
+    }
+
+    class ZoldsegKonzerv {
+        - vegetableType: String
+        - bio: boolean
+        + ZoldsegKonzerv(id: int, tipus: KonzervTipus, nettoGramm: int, vegetableType: String, createdAt: LocalDate, bio: boolean)
+        + getRecommendedStorageTemp(): int
+        + toString(): String
+    }
+
+    class HusKonzerv {
+        - meatType: String
+        + HusKonzerv(id: int, tipus: KonzervTipus, nettoGramm: int, meatType: String, createdAt: LocalDate)
+        + getRecommendedStorageTemp(): int
+        + toString(): String
+    }
+
+    class Gyartosor {
+        - id: int
+        - sebesseg: int
+        - aktiv: boolean
+        - strategia: GyartasiStrategia
+        + Gyartosor(id: int, sebesseg: int, strategia: GyartasiStrategia)
+        + gyartCiklus(raktar: Raktar): List<Konzerv>
+        + setSebesseg(sebesseg: int): void
+        + setAktiv(aktiv: boolean): void
+        + setStrategia(strategia: GyartasiStrategia): void
+        + toString(): String
+    }
+
+    class Raktar {
+        - maxKapacitas: int
+        - keszlet: List<Konzerv>
+        + Raktar(maxKapacitas: int)
+        + raktarozas(konzerv: Konzerv): void
+        + kiszallit(tipus: KonzervTipus, darabszam: int): List<Konzerv>
+        + selejtezLejartakat(): int
+        + getDarabszamTipusSzerint(tipus: KonzervTipus): int
+        + getLeghianyosabbTipus(): KonzervTipus
+        + getKeszletLejaratSzerint(): List<Konzerv>
+        + isTele(): boolean
+    }
+}
+
+package "org.example.strategy" {
+    interface GyartasiStrategia {
+        + meghatarozKovetkezoGyartas(raktar: Raktar): KonzervTipus
+        + getStrategiaNev(): String
+    }
+
+    class ManualisGyartasStrategia {
+        - celTipus: KonzervTipus
+        + ManualisGyartasStrategia(celTipus: KonzervTipus)
+        + meghatarozKovetkezoGyartas(raktar: Raktar): KonzervTipus
+        + getStrategiaNev(): String
+    }
+
+    class AutomatikusHianyAlapuStrategia {
+        + meghatarozKovetkezoGyartas(raktar: Raktar): KonzervTipus
+        + getStrategiaNev(): String
+    }
+}
+
+package "org.example.factory" {
+    class KonzervFactory {
+        - {static} nextId: int
+        - KonzervFactory()
+        + {static} createKonzerv(tipus: KonzervTipus): Konzerv
+        + {static} createZoldsegKonzerv(tipus: KonzervTipus, nettoGramm: int, vegetableType: String, createdAt: LocalDate, bio: boolean): Konzerv
+        + {static} createHusKonzerv(tipus: KonzervTipus, nettoGramm: int, meatType: String, createdAt: LocalDate): Konzerv
+        + {static} syncNextId(existingId: int): void
+    }
+}
+
+package "org.example.persistence" {
+    interface StorageService {
+        + ment(gyarManager: GyarManager, fajlUtvonal: String): void
+        + betolt(fajlUtvonal: String): GyarManager
+    }
+
+    class JsonStorageService {
+        - gson: Gson
+        + JsonStorageService()
+        + ment(gyarManager: GyarManager, fajlUtvonal: String): void
+        + betolt(fajlUtvonal: String): GyarManager
+    }
+}
+
+package "org.example.exception" {
+    class KonzervGyarException {
+        + KonzervGyarException(message: String)
+    }
+
+    class ErvenytelenGyartasiMuveletException {
+        + ErvenytelenGyartasiMuveletException(message: String)
+    }
+
+    class RaktarMegteltException {
+        + RaktarMegteltException(message: String)
+    }
+}
+
+' Öröklődés és interfész-megvalósítás
+Konzerv <|-- ZoldsegKonzerv
+Konzerv <|-- HusKonzerv
+GyartasiStrategia <|.. ManualisGyartasStrategia
+GyartasiStrategia <|.. AutomatikusHianyAlapuStrategia
+StorageService <|.. JsonStorageService
+KonzervGyarException <|-- ErvenytelenGyartasiMuveletException
+
+' Kompozíció, aggregáció és asszociáció (multiplicitásokkal)
+Main ..> ConsoleMenu : indít
+Main ..> GyarManager : létrehoz
+Main ..> JsonStorageService : létrehoz
+
+ConsoleMenu "1" --> "1" GyarManager : vezérel
+ConsoleMenu "1" --> "1" StorageService : használ
+
+GyarManager "1" *-- "1" Raktar : birtokol
+GyarManager "1" *-- "1..*" Gyartosor : kezel
+
+Raktar "1" o-- "0..*" Konzerv : tárol
+
+Gyartosor "1" o--> "1" GyartasiStrategia : alkalmaz
+Gyartosor ..> KonzervFactory : gyártat
+Gyartosor ..> Raktar : betárol
+
+Konzerv "*" --> "1" KonzervTipus : típusa
+ManualisGyartasStrategia "*" --> "1" KonzervTipus : céltípus
+AutomatikusHianyAlapuStrategia ..> Raktar : elemez
+
+KonzervFactory ..> ZoldsegKonzerv : példányosít
+KonzervFactory ..> HusKonzerv : példányosít
+
+JsonStorageService ..> GyarManager : ment / betölt
+JsonStorageService ..> KonzervFactory : ID szinkronizálás
+
+Gyartosor ..> ErvenytelenGyartasiMuveletException : dob
+Gyartosor ..> RaktarMegteltException : dob
+Raktar ..> RaktarMegteltException : dob
+Raktar ..> KonzervGyarException : dob
+
+@enduml

@@ -19,7 +19,7 @@ public class HusKonzerv extends Konzerv{
 
     @Override
     public int getRecommendedStorageTemp() {
-        return 20;
+        return 18;
     }
 
     @Override

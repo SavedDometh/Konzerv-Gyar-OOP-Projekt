@@ -26,7 +26,7 @@ public class KonzervFactory {
             case ZOLDBORSO -> createZoldsegKonzerv(tipus, 400, "Zsenge zöldborsó", today, false);
             case MARHAPORKOLT -> createHusKonzerv(tipus, 500, "Marhahús", today);
             case MAJKREM -> createHusKonzerv(tipus, 120, "Sertésmáj", today);
-            case TONHAL -> createHusKonzerv(tipus, 300, "Sertéshús", today);
+            case TONHAL -> createHusKonzerv(tipus, 300, "Tonhal", today);
         };
     }
 

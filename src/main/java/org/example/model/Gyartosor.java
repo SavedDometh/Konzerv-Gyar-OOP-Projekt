@@ -41,7 +41,9 @@ public class Gyartosor {
         if (raktar == null) {
             throw new IllegalArgumentException("A célraktár nem lehet null!");
         }
-
+        if (raktar.getSzabadHelyek() < sebesseg){
+            throw  new RaktarMegteltException("Raktárban nincs elég hely egy teljes ciklus lefutásához!");
+        }
         KonzervTipus kivalasztottTipus = strategia.meghatarozKovetkezoGyartas(raktar);
         List<Konzerv> legyartottAdag = new ArrayList<>();
 

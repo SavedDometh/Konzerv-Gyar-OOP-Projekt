@@ -1,10 +1,13 @@
 # Konzervgyár – Termelés- és Raktárirányító Szimuláció
 
-Objektumorientált Java konzolos alkalmazás, egy konzervgyár működését, gyártósorainak vezérlését és raktárkészlet-gazdálkodását szimulálja.
+Objektumorientált Java konzolos alkalmazás, egy konzervgyár működését, gyártósorainak vezérlését és raktárkészlet kezelését szimulálja.
 
 ---
 
-## Főbb funkciók
+## Leírás
+
+Gyarmanager.java példányosít 2 db Gyartosor osztályt azonosítóval, sebességgel (egy ciklus alatt hány db konzervet gyárt), aktív/leállított, mindkettőnél kiválasztható a gyártási stratégia (Manuálisan beállított konzervtípus/Automatikus - raktárban legkevesebbet gyárt). Lehet léptetni tetszőleges ciklussal a gyártást, a legyártott konzerveket a raktárban tárolja. Gyár állapotát el lehet menteni és visszatölteni JSON formátumban.
+
 
 * **Több gyártósor párhuzamos kezelése:** Különálló gyártósor-példányok egyedi azonosítóval, állítható ciklussebességgel ($\text{db/ciklus}$) és üzemállapottal (aktív / leállított).
 * **Dinamikus gyártási stratégiák:** Futásidőben váltható működési módok soronként:
@@ -17,42 +20,32 @@ Objektumorientált Java konzolos alkalmazás, egy konzervgyár működését, gy
 
 ---
 
-## Alkalmazott OOP elvek és tervezési minták
+## Technikai követelmények és tervezési minták
 
-1. **Absztrakció, öröklődés és futásidejű polimorfizmus:**
-   * A `Konzerv` absztrakt osztály definiálja a közös attribútumokat és az absztrakt `getRecommendedStorageTemp()` metódust, amelyet a `ZoldsegKonzerv` és a `HusKonzerv` eltérő üzleti szabályokkal valósít meg.
-   * A `Comparable<Konzerv>` interfész a lejárati dátum szerinti természetes rendezést biztosítja, amelyet a `Raktar` `Comparator`-alapú rendezéssel (nettó tömeg szerint) egészít ki.
-2. **Enkapszuláció és defenzív másolás:**
-   * Minden modellosztály konstruktora validálja a bemeneti paramétereket.
-   * A belső kollekciók (`Raktar.getKeszlet()`, `GyarManager.getGyartosorok()`) kizárólag módosíthatatlan nézetként (`Collections.unmodifiableList`) érhetők el kívülről.
-3. **Strategy tervezési minta (`strategy` csomag):**
-   * A `Gyartosor` osztály nem öröklődéssel, hanem kompozícióval (`GyartasiStrategia` referencia) határozza meg a következő gyártandó terméket, így futásidőben bármelyik gépsor átállítható manuális és automatikus üzemmód között.
-4. **Factory tervezési minta (`factory` csomag):**
-   * A `KonzervFactory` elfedi a konkrét konzervosztályok példányosítását és az egyedi azonosítók (`nextId`) kiosztását, biztosítva a JSON visszatöltés utáni azonosító-szinkronizációt is.
-5. **Egyedi kivételhierarchia (`exception` csomag):**
-   * A közös `KonzervGyarException` ősosztályból származó specifikus kivételek (`RaktarMegteltException`, `ErvenytelenGyartasiMuveletException`) tisztán jelzik az üzleti szabályok megsértését a UI réteg felé.
-6. **Polimorf JSON perzisztencia (`persistence` csomag):**
-   * A `JsonStorageService` `try-with-resources` szerkezettel, UTF-8 kódolással és egyedi Gson `TypeAdapter` megvalósításokkal kezeli az absztrakt `Konzerv` és a `GyartasiStrategia` típusok mentését és visszatöltését.
+1. **Enkapszuláció:**
+   Protected (Konzerv.java) konstruktor használata. Osztályok adatait private mezőkben vannak és getterekkel lehet hozzáférni.
+2. **Absztrakció:**
+   Interface-ek használata (StorageService és GyartasiStrategia), Abstract osztály használata (Konzerv.java).
+3. **Inheritance and polymorphism:**
+   2 konkrét osztály közös parent osztállyal (HusKonzerv, ZoldsegKonzerv), felülírt működéssel (getRecommendedStorageTemp).
+4. **Relationships:**
+   GyarManager összefogja a Raktar-at és 2 db Gyartosor-t. A Raktar tárolja a különböző Konzerv objektumokat.
+5. **Collections and generics:**
+   A raktárkészlet és a gyártósorok kezelése ArrayList listákban. A készlet rendezhető lejárati dátum szerint a Konzerv osztályban Comparable<Konzerv> metódussal.
+6. **Exceptions:**
+   Létrehoztam saját exception-eket, metódusok bemenetét ahol szükséges ellenőrzi a program.
+7. **Persistence:**
+   A gyár  állapota JSON formátumban menthető és visszatölthető a Gson könyvtárra épülő JsonStorageService osztályon keresztül.
+8. **Build:**
+   A projekt Maven (pom.xml) felépítésű.
 
 ---
 
-## Követelmények, fordítás és futtatás
+## Fordítás és futtatás
 
 ### Előfeltételek
-* **Java Development Kit (JDK):** Java 27 (a `pom.xml` beállításai szerint; korábbi LTS verzió esetén a `maven.compiler.source` és `target` értékek módosíthatók)
+* **Java Development Kit (JDK):** Java 21 (a `pom.xml` beállításai szerint; korábbi LTS verzió esetén a `maven.compiler.source` és `target` értékek módosíthatók)
 * **Apache Maven:** 3.8+
-
-### Fordítás és tesztek futtatása
-
-A projekt gyökérkönyvtárából (`KonzervGyar/`) futtatható parancsok:
-
-```bash
-# Projekt fordítása
-mvn clean compile
-
-# Egységtesztek futtatása
-mvn test
-```
 
 ### Alkalmazás indítása
 
@@ -73,6 +66,9 @@ Indítás után az alábbi főmenüpontok érhetők el:
 7. **Gyár állapotának mentése (JSON)** – Aktuális állapot kiírása a `gyar_allapot.json` fájlba.
 8. **Gyár állapotának betöltése (JSON)** – Korábban mentett állapot visszaállítása.
 
+<img width="472" height="278" alt="kép" src="https://github.com/user-attachments/assets/2ad12852-a20b-40fc-8081-326cebf748c2" />
+
 ---
 
-Készítette: Németh Domonkos (SavedDometh)
+Készítette: SavedDometh
+Copyright (c) 2026-present, SavedDometh
